@@ -1,1 +1,0 @@
-worker: railway deploy && go run main.go
