@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -86,6 +87,7 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 }
 
 func main() {
+	fmt.Println("Starting telegram bot...")
 	http.HandleFunc("/", HandleTelegramWebHook)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
