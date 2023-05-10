@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"encoding/json"
@@ -29,7 +29,7 @@ type Chat struct {
 }
 
 // parseTelegramRequest handles incoming update from the Telegram web hook
-func ParseTelegramRequest(r *http.Request) (*Update, error) {
+func parseTelegramRequest(r *http.Request) (*Update, error) {
 	var update Update
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 		log.Printf("could not decode incoming update %s", err.Error())
@@ -41,7 +41,7 @@ func ParseTelegramRequest(r *http.Request) (*Update, error) {
 func HandleTelegramWebHook(w http.ResponseWriter, r *http.Request) {
 	// Parse incoming request
 	fmt.Println("Got request\nTrying to parse...")
-	var update, err = ParseTelegramRequest(r)
+	var update, err = parseTelegramRequest(r)
 	if err != nil {
 		log.Printf("error parsing update, %s", err.Error())
 		return
@@ -86,10 +86,4 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 	log.Printf("Body of Telegram Response: %s", bodyString)
 
 	return bodyString, nil
-}
-
-func main() {
-	log.Println("Starting telegram bot...")
-	http.HandleFunc("/", HandleTelegramWebHook)
-	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
