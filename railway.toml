@@ -1,0 +1,11 @@
+[setup]
+command = "sudo apt update && sudo apt install -y golang-go"
+
+[build]
+builder = "nixpacks"
+
+
+[deploy]
+startCommand = "go run main.go"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

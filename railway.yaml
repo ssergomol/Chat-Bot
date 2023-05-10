@@ -1,4 +1,0 @@
-name: my-telegram-bot
-env: go1.16
-buildCommand: go build -o bin/bot
-startCommand: ./bin/bot
