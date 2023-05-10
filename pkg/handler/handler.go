@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -28,6 +28,17 @@ type Chat struct {
 	Id int `json:"id"`
 }
 
+// Define a struct to represent the JSON response from the Telegram API
+type telegramResponse struct {
+	Ok     bool `json:"ok"`
+	Result struct {
+		MessageId int `json:"message_id"`
+		Chat      struct {
+			Id int `json:"id"`
+		} `json:"chat"`
+	} `json:"result"`
+}
+
 // parseTelegramRequest handles incoming update from the Telegram web hook
 func parseTelegramRequest(r *http.Request) (*Update, error) {
 	var update Update
@@ -40,13 +51,21 @@ func parseTelegramRequest(r *http.Request) (*Update, error) {
 
 func HandleTelegramWebHook(w http.ResponseWriter, r *http.Request) {
 	// Parse incoming request
-	fmt.Println("Got request\nTrying to parse...")
+	log.Println("Got request\nTrying to parse...")
 	var update, err = parseTelegramRequest(r)
 	if err != nil {
-		log.Printf("error parsing update, %s", err.Error())
+		log.Printf("error parsing update, %s\n", err.Error())
 		return
 	}
-	fmt.Println("Successfully parsed")
+	log.Println("Successfully parsed")
+
+	if update.Message.Text == "/start" {
+		if err = createButtons(update.Message.Chat.Id); err != nil {
+			log.Printf("error creating buttons, %s\n", err.Error())
+			return
+		}
+		log.Printf("Buttons successfully created\n")
+	}
 
 	outputMessage := "Your message: " + update.Message.Text
 
@@ -86,4 +105,56 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 	log.Printf("Body of Telegram Response: %s", bodyString)
 
 	return bodyString, nil
+}
+
+func createButtons(chatId int) error {
+	// Set up the URL for the Telegram API
+	apiUrl := "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_BOT_TOKEN") + "/sendMessage"
+
+	// Create a slice of slices to represent the inline keyboard
+	buttons := [][]string{
+		{"Button 1", "Button 2"},
+		{"Button 3", "Button 4"},
+	}
+
+	// Convert the keyboard to JSON format
+	keyboard, err := json.Marshal(map[string]interface{}{
+		"inline_keyboard": buttons,
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	// Create the message payload
+	payload, err := json.Marshal(map[string]interface{}{
+		"chat_id":      strconv.Itoa(chatId),
+		"text":         "Please select an option:",
+		"reply_markup": keyboard,
+	})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	// Send the message to the Telegram API
+	resp, err := http.Post(apiUrl, "application/json", bytes.NewBuffer(payload))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	// Parse the response from the Telegram API
+	var telegramResp telegramResponse
+	err = json.NewDecoder(resp.Body).Decode(&telegramResp)
+	if err != nil {
+		return err
+	}
+
+	// Check if the response was successful
+	if !telegramResp.Ok {
+		log.Fatalf("Error sending message: %s", resp.Status)
+	}
+
+	log.Println("Message sent!")
+	return nil
 }
