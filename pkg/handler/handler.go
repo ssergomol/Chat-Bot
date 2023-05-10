@@ -106,7 +106,7 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 	return bodyString, nil
 }
 
-func createButtons(chatId int) (string, error) {
+func createButtons(chatId int) error {
 	// Set up the URL for the Telegram API
 	var telegramApi string = "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_BOT_TOKEN") + "/sendMessage"
 
@@ -135,7 +135,7 @@ func createButtons(chatId int) (string, error) {
 	optsJSON, err := json.Marshal(opts)
 	if err != nil {
 		log.Println("Error:", err)
-		return "", err
+		return err
 	}
 	// fmt.Println(string(optsJSON))
 
@@ -205,17 +205,17 @@ func createButtons(chatId int) (string, error) {
 
 	if err != nil {
 		log.Printf("error when posting text to the chat: %s", err.Error())
-		return "", err
+		return err
 	}
 	defer response.Body.Close()
 
 	var bodyBytes, errRead = ioutil.ReadAll(response.Body)
 	if errRead != nil {
 		log.Printf("error in parsing telegram answer %s", errRead.Error())
-		return "", err
+		return err
 	}
 	bodyString := string(bodyBytes)
 	log.Printf("Body of Telegram Response: %s", bodyString)
 
-	return bodyString, nil
+	return nil
 }
