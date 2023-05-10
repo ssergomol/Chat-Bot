@@ -150,6 +150,8 @@ func createButtons(chatId int) error {
 		return err
 	}
 
+	log.Println(resp.Body)
+
 	// Check if the response was successful
 	if !telegramResp.Ok {
 		log.Fatalf("Error sending message: %s", resp.Status)
