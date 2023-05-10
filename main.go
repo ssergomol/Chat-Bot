@@ -40,11 +40,13 @@ func ParseTelegramRequest(r *http.Request) (*Update, error) {
 
 func HandleTelegramWebHook(w http.ResponseWriter, r *http.Request) {
 	// Parse incoming request
+	log.Println("Got request\nTrying to parse...")
 	var update, err = ParseTelegramRequest(r)
 	if err != nil {
 		log.Printf("error parsing update, %s", err.Error())
 		return
 	}
+	log.Println("Successfully parsed")
 
 	outputMessage := "Your message: " + update.Message.Text
 
@@ -89,5 +91,5 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 func main() {
 	fmt.Println("Starting telegram bot...")
 	http.HandleFunc("/", HandleTelegramWebHook)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
