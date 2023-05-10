@@ -89,7 +89,7 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 }
 
 func main() {
-	fmt.Println("Starting telegram bot...")
+	log.Println("Starting telegram bot...")
 	http.HandleFunc("/", HandleTelegramWebHook)
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }
