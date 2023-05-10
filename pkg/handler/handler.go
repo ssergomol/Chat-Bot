@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -107,63 +106,116 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 	return bodyString, nil
 }
 
-func createButtons(chatId int) error {
+func createButtons(chatId int) (string, error) {
 	// Set up the URL for the Telegram API
-	apiUrl := "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_BOT_TOKEN") + "/sendMessage"
+	var telegramApi string = "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_BOT_TOKEN") + "/sendMessage"
 
 	// Create a slice of slices to represent the inline keyboard
-	buttons := [][]string{
-		{"Button 1", "Button 2"},
-		{"Button 3", "Button 4"},
+	// buttons := [][]string{
+	// 	{"Button 1", "Button 2"},
+	// 	{"Button 3", "Button 4"},
+	// }
+
+	opts := map[string]interface{}{
+		"reply_markup": map[string]interface{}{
+			"inline_keyboard": [][]map[string]interface{}{
+				{
+					{
+						"text":          "A",
+						"callback_data": "A1",
+					},
+					{
+						"text":          "B",
+						"callback_data": "C1",
+					},
+				},
+			},
+		},
 	}
+	optsJSON, err := json.Marshal(opts)
+	if err != nil {
+		log.Println("Error:", err)
+		return "", err
+	}
+	// fmt.Println(string(optsJSON))
+
+	response, err := http.PostForm(
+		telegramApi,
+		url.Values{
+			"chat_id":      {strconv.Itoa(chatId)},
+			"text":         {"Some text"},
+			"reply_markup": {string(optsJSON)},
+		})
 
 	// Convert the keyboard to JSON format
-	keyboard, err := json.Marshal(map[string]interface{}{
-		"inline_keyboard": buttons,
-	})
-	if err != nil {
-		log.Println(err)
-	}
+	// keyboard, err := json.Marshal(map[string]interface{}{
+	// 	"inline_keyboard": buttons,
+	// })
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 
 	// Create the message payload
-	payload, err := json.Marshal(map[string]interface{}{
-		"chat_id":      strconv.Itoa(chatId),
-		"text":         "Please select an option:",
-		"reply_markup": keyboard,
-	})
-	if err != nil {
-		log.Println(err)
-		return err
-	}
+	// payload, err := json.Marshal(map[string]interface{}{
+	// 	"chat_id":      strconv.Itoa(chatId),
+	// 	"text":         "Please select an option:",
+	// 	"reply_markup": keyboard,
+	// })
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
 
 	// Send the message to the Telegram API
-	resp, err := http.Post(apiUrl, "application/json", bytes.NewBuffer(payload))
-	if err != nil {
-		log.Println(err)
-		return err
-	}
+	// resp, err := http.Post(telegramApi, "application/json", bytes.NewBuffer(payload))
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
 
 	// Parse the response from the Telegram API
-	var telegramResp telegramResponse
-	err = json.NewDecoder(resp.Body).Decode(&telegramResp)
-	if err != nil {
-		return err
-	}
+	// var telegramResp telegramResponse
+	// err = json.NewDecoder(resp.Body).Decode(&telegramResp)
+	// if err != nil {
+	// 	return err
+	// }
 
-	var bodyBytes, errRead = ioutil.ReadAll(resp.Body)
+	// var bodyBytes, errRead = ioutil.ReadAll(resp.Body)
+	// if errRead != nil {
+	// 	log.Printf("error in parsing telegram answer %s", errRead.Error())
+	// 	return err
+	// }
+
+	// bodyString := string(bodyBytes)
+	// log.Printf("Body of Telegram Response to \\start : %s\n", bodyString)
+
+	// // Check if the response was successful
+	// if !telegramResp.Ok {
+	// 	log.Fatalf("Error sending message: %s", resp.Status)
+	// }
+
+	// log.Println("Message sent!")
+
+	// response, err := http.PostForm(
+	// 	telegramApi,
+	// 	url.Values{
+	// 		"chat_id": {strconv.Itoa(chatId)},
+	// 		"text":    {text},
+	// 	})
+
+	if err != nil {
+		log.Printf("error when posting text to the chat: %s", err.Error())
+		return "", err
+	}
+	defer response.Body.Close()
+
+	var bodyBytes, errRead = ioutil.ReadAll(response.Body)
 	if errRead != nil {
 		log.Printf("error in parsing telegram answer %s", errRead.Error())
-		return err
+		return "", err
 	}
-
 	bodyString := string(bodyBytes)
-	log.Printf("Body of Telegram Response to \\start : %s\n", bodyString)
+	log.Printf("Body of Telegram Response: %s", bodyString)
 
-	// Check if the response was successful
-	if !telegramResp.Ok {
-		log.Fatalf("Error sending message: %s", resp.Status)
-	}
-
-	log.Println("Message sent!")
-	return nil
+	return bodyString, nil
 }
