@@ -150,7 +150,14 @@ func createButtons(chatId int) error {
 		return err
 	}
 
-	log.Println(resp.Body)
+	var bodyBytes, errRead = ioutil.ReadAll(resp.Body)
+	if errRead != nil {
+		log.Printf("error in parsing telegram answer %s", errRead.Error())
+		return err
+	}
+
+	bodyString := string(bodyBytes)
+	log.Printf("Body of Telegram Response to \\start : %s\n", bodyString)
 
 	// Check if the response was successful
 	if !telegramResp.Ok {
