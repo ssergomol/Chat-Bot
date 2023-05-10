@@ -1,4 +1,4 @@
-package handler
+package main
 
 import (
 	"encoding/json"
@@ -83,4 +83,9 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 	log.Printf("Body of Telegram Response: %s", bodyString)
 
 	return bodyString, nil
+}
+
+func main() {
+	http.HandleFunc("/", HandleTelegramWebHook)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
