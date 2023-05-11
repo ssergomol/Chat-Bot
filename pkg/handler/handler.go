@@ -135,11 +135,11 @@ func createButtons(chatId int) error {
 	var telegramApi string = "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_BOT_TOKEN") + "/sendMessage"
 
 	keyboard := [][]KeyboardButton{
-		[]KeyboardButton{
+		{
 			KeyboardButton{Text: "Button 1"},
 			KeyboardButton{Text: "Button 2"},
 		},
-		[]KeyboardButton{
+		{
 			KeyboardButton{Text: "Button 3"},
 			KeyboardButton{Text: "Button 4"},
 		},
