@@ -38,6 +38,25 @@ type telegramResponse struct {
 	} `json:"result"`
 }
 
+type SendMessageParams struct {
+	ChatId      string               `json:"chat_id"`
+	Text        string               `json:"text"`
+	ReplyMarkup *ReplyKeyboardMarkup `json:"reply_markup,omitempty"`
+}
+
+type ReplyKeyboardMarkup struct {
+	Keyboard        [][]KeyboardButton `json:"keyboard"`
+	ResizeKeyboard  bool               `json:"resize_keyboard,omitempty"`
+	OneTimeKeyboard bool               `json:"one_time_keyboard,omitempty"`
+	Selective       bool               `json:"selective,omitempty"`
+}
+
+type KeyboardButton struct {
+	Text            string `json:"text"`
+	RequestContact  bool   `json:"request_contact,omitempty"`
+	RequestLocation bool   `json:"request_location,omitempty"`
+}
+
 // parseTelegramRequest handles incoming update from the Telegram web hook
 func parseTelegramRequest(r *http.Request) (*Update, error) {
 	var update Update
@@ -58,13 +77,13 @@ func HandleTelegramWebHook(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Successfully parsed")
 
-	if update.Message.Text == "/start" {
-		if err = createButtons(update.Message.Chat.Id); err != nil {
-			log.Printf("error creating buttons, %s\n", err.Error())
-			return
-		}
-		log.Printf("Buttons successfully created\n")
-	}
+	// if update.Message.Text == "/start" {
+	// 	if err = createButtons(update.Message.Chat.Id); err != nil {
+	// 		log.Printf("error creating buttons, %s\n", err.Error())
+	// 		return
+	// 	}
+	// 	log.Printf("Buttons successfully created\n")
+	// }
 
 	outputMessage := "Your message: " + update.Message.Text
 
@@ -82,13 +101,18 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 	log.Printf("Sending %s to chat_id: %d", text, chatId)
 
 	var telegramApi string = "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_BOT_TOKEN") + "/sendMessage"
-	response, err := http.PostForm(
-		telegramApi,
-		url.Values{
-			"chat_id": {strconv.Itoa(chatId)},
-			"text":    {text},
-		})
 
+	params := SendMessageParams{
+		ChatId: strconv.Itoa(chatId),
+		Text:   text,
+	}
+
+	form := url.Values{}
+
+	form.Add("chat_id", params.ChatId)
+	form.Add("text", params.Text)
+
+	response, err := http.PostForm(telegramApi, form)
 	if err != nil {
 		log.Printf("error when posting text to the chat: %s", err.Error())
 		return "", err
@@ -121,12 +145,10 @@ func createButtons(chatId int) error {
 			"inline_keyboard": [][]map[string]interface{}{
 				{
 					{
-						"text":          "A",
-						"callback_data": "A1",
+						"text": "A",
 					},
 					{
-						"text":          "B",
-						"callback_data": "C1",
+						"text": "B",
 					},
 				},
 			},
