@@ -134,40 +134,73 @@ func createButtons(chatId int) error {
 	// Set up the URL for the Telegram API
 	var telegramApi string = "https://api.telegram.org/bot" + os.Getenv("TELEGRAM_BOT_TOKEN") + "/sendMessage"
 
+	keyboard := [][]KeyboardButton{
+		[]KeyboardButton{
+			KeyboardButton{Text: "Button 1"},
+			KeyboardButton{Text: "Button 2"},
+		},
+		[]KeyboardButton{
+			KeyboardButton{Text: "Button 3"},
+			KeyboardButton{Text: "Button 4"},
+		},
+	}
+
+	replyMarkup := &ReplyKeyboardMarkup{
+		Keyboard:       keyboard,
+		ResizeKeyboard: true,
+	}
+
+	params := SendMessageParams{
+		ChatId:      strconv.Itoa(chatId),
+		Text:        "Some text",
+		ReplyMarkup: replyMarkup,
+	}
+
+	replyMarkupJson, err := json.Marshal(params.ReplyMarkup)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	form := url.Values{}
+	form.Add("chat_id", params.ChatId)
+	form.Add("text", params.Text)
+	form.Add("reply_markup", string(replyMarkupJson))
+
 	// Create a slice of slices to represent the inline keyboard
 	// buttons := [][]string{
 	// 	{"Button 1", "Button 2"},
 	// 	{"Button 3", "Button 4"},
 	// }
 
-	opts := map[string]interface{}{
-		"reply_markup": map[string]interface{}{
-			"inline_keyboard": [][]map[string]interface{}{
-				{
-					{
-						"text": "A",
-					},
-					{
-						"text": "B",
-					},
-				},
-			},
-		},
-	}
-	optsJSON, err := json.Marshal(opts)
-	if err != nil {
-		log.Println("Error:", err)
-		return err
-	}
+	// opts := map[string]interface{}{
+	// 	"reply_markup": map[string]interface{}{
+	// 		"inline_keyboard": [][]map[string]interface{}{
+	// 			{
+	// 				{
+	// 					"text": "A",
+	// 				},
+	// 				{
+	// 					"text": "B",
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// }
+	// optsJSON, err := json.Marshal(opts)
+	// if err != nil {
+	// 	log.Println("Error:", err)
+	// 	return err
+	// }
 	// fmt.Println(string(optsJSON))
 
-	response, err := http.PostForm(
-		telegramApi,
-		url.Values{
-			"chat_id":      {strconv.Itoa(chatId)},
-			"text":         {"Some text"},
-			"reply_markup": {string(optsJSON)},
-		})
+	// response, err := http.PostForm(
+	// 	telegramApi,
+	// 	url.Values{
+	// 		"chat_id":      {strconv.Itoa(chatId)},
+	// 		"text":         {"Some text"},
+	// 		"reply_markup": {string(optsJSON)},
+	// 	})
 
 	// Convert the keyboard to JSON format
 	// keyboard, err := json.Marshal(map[string]interface{}{
@@ -225,8 +258,9 @@ func createButtons(chatId int) error {
 	// 		"text":    {text},
 	// 	})
 
+	response, err := http.PostForm(telegramApi, form)
 	if err != nil {
-		log.Printf("error when posting text to the chat: %s", err.Error())
+		log.Printf("/start: error when posting text to the chat: %s", err.Error())
 		return err
 	}
 	defer response.Body.Close()
