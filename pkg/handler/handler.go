@@ -155,7 +155,7 @@ func createButtons(chatId int) error {
 
 	params := SendMessageParams{
 		ChatId:      strconv.Itoa(chatId),
-		Text:        "Some text",
+		Text:        "Ready to output your messages, Sir!",
 		ReplyMarkup: replyMarkup,
 	}
 
@@ -169,97 +169,6 @@ func createButtons(chatId int) error {
 	form.Add("chat_id", params.ChatId)
 	form.Add("text", params.Text)
 	form.Add("reply_markup", string(replyMarkupJson))
-
-	// Create a slice of slices to represent the inline keyboard
-	// buttons := [][]string{
-	// 	{"Button 1", "Button 2"},
-	// 	{"Button 3", "Button 4"},
-	// }
-
-	// opts := map[string]interface{}{
-	// 	"reply_markup": map[string]interface{}{
-	// 		"inline_keyboard": [][]map[string]interface{}{
-	// 			{
-	// 				{
-	// 					"text": "A",
-	// 				},
-	// 				{
-	// 					"text": "B",
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
-	// optsJSON, err := json.Marshal(opts)
-	// if err != nil {
-	// 	log.Println("Error:", err)
-	// 	return err
-	// }
-	// fmt.Println(string(optsJSON))
-
-	// response, err := http.PostForm(
-	// 	telegramApi,
-	// 	url.Values{
-	// 		"chat_id":      {strconv.Itoa(chatId)},
-	// 		"text":         {"Some text"},
-	// 		"reply_markup": {string(optsJSON)},
-	// 	})
-
-	// Convert the keyboard to JSON format
-	// keyboard, err := json.Marshal(map[string]interface{}{
-	// 	"inline_keyboard": buttons,
-	// })
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-
-	// Create the message payload
-	// payload, err := json.Marshal(map[string]interface{}{
-	// 	"chat_id":      strconv.Itoa(chatId),
-	// 	"text":         "Please select an option:",
-	// 	"reply_markup": keyboard,
-	// })
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return err
-	// }
-
-	// Send the message to the Telegram API
-	// resp, err := http.Post(telegramApi, "application/json", bytes.NewBuffer(payload))
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return err
-	// }
-
-	// Parse the response from the Telegram API
-	// var telegramResp telegramResponse
-	// err = json.NewDecoder(resp.Body).Decode(&telegramResp)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// var bodyBytes, errRead = ioutil.ReadAll(resp.Body)
-	// if errRead != nil {
-	// 	log.Printf("error in parsing telegram answer %s", errRead.Error())
-	// 	return err
-	// }
-
-	// bodyString := string(bodyBytes)
-	// log.Printf("Body of Telegram Response to \\start : %s\n", bodyString)
-
-	// // Check if the response was successful
-	// if !telegramResp.Ok {
-	// 	log.Fatalf("Error sending message: %s", resp.Status)
-	// }
-
-	// log.Println("Message sent!")
-
-	// response, err := http.PostForm(
-	// 	telegramApi,
-	// 	url.Values{
-	// 		"chat_id": {strconv.Itoa(chatId)},
-	// 		"text":    {text},
-	// 	})
 
 	response, err := http.PostForm(telegramApi, form)
 	if err != nil {
