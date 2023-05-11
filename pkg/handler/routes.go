@@ -6,13 +6,11 @@ import (
 )
 
 func HandleTelegramWebHook(w http.ResponseWriter, r *http.Request) {
-	log.Println("Got request\nTrying to parse...")
 	var update, err = parseTelegramRequest(r)
 	if err != nil {
 		log.Printf("error parsing update, %s\n", err.Error())
 		return
 	}
-	log.Println("Successfully parsed")
 
 	if update.Message.Text == "/start" {
 		if err = createButtons(update.Message.Chat.Id); err != nil {

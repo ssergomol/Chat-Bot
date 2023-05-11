@@ -14,12 +14,13 @@ import (
 func parseTelegramRequest(r *http.Request) (*Update, error) {
 	var update Update
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
-		log.Printf("could not decode incoming update %s", err.Error())
+		log.Printf("Could not decode incoming update %s", err.Error())
 		return nil, err
 	}
 	return &update, nil
 }
 
+// Sneds processed text to Telegram Chat
 func sendTextToTelegramChat(chatId int, text string) (string, error) {
 	log.Printf("Sending %s to chat_id: %d", text, chatId)
 
@@ -37,14 +38,14 @@ func sendTextToTelegramChat(chatId int, text string) (string, error) {
 
 	response, err := http.PostForm(telegramApi, form)
 	if err != nil {
-		log.Printf("error when posting text to the chat: %s", err.Error())
+		log.Printf("Error when posting text to the chat: %s", err.Error())
 		return "", err
 	}
 	defer response.Body.Close()
 
 	var bodyBytes, errRead = ioutil.ReadAll(response.Body)
 	if errRead != nil {
-		log.Printf("error in parsing telegram answer %s", errRead.Error())
+		log.Printf("Error in parsing telegram answer %s", errRead.Error())
 		return "", err
 	}
 	bodyString := string(bodyBytes)
@@ -94,18 +95,18 @@ func createButtons(chatId int) error {
 
 	response, err := http.PostForm(telegramApi, form)
 	if err != nil {
-		log.Printf("/start: error when posting text to the chat: %s", err.Error())
+		log.Printf("/start: Error when posting text to the chat: %s", err.Error())
 		return err
 	}
 	defer response.Body.Close()
 
 	var bodyBytes, errRead = ioutil.ReadAll(response.Body)
 	if errRead != nil {
-		log.Printf("error in parsing telegram answer %s", errRead.Error())
+		log.Printf("/start: Error in parsing telegram answer %s", errRead.Error())
 		return err
 	}
 	bodyString := string(bodyBytes)
-	log.Printf("Body of Telegram Response: %s", bodyString)
+	log.Printf("/start: Body of Telegram Response: %s", bodyString)
 
 	return nil
 }
