@@ -137,12 +137,14 @@ func createButtons(chatId int) error {
 
 	keyboard := [][]KeyboardButton{
 		{
-			KeyboardButton{Text: "Button 1"},
-			KeyboardButton{Text: "Button 2"},
+			{Text: "Button 1.1"},
+			{Text: "Button 1.2"},
 		},
 		{
-			KeyboardButton{Text: "Button 3"},
-			KeyboardButton{Text: "Button 4"},
+			{Text: "Button 2.1"},
+			{Text: "Button 2.2"},
+			{Text: "Button 2.3"},
+			{Text: "Button 2.4"},
 		},
 	}
 
